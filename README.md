@@ -9,3 +9,7 @@ CUDA_VISIBLE_DEVICES=0 python infer_bilinear.py --start_channel 4 --using_l2 2 -
 
 python compute_dsc_jet_from_quantiResult.py
 ```
+
+# Acknowledgment
+
+We note that parts of the code are adopted from [IC-Net](https://github.com/zhangjun001/ICNet), [SYM-Net,](https://github.com/cwmok/Fast-Symmetric-Diffeomorphic-Image-Registration-with-Convolutional-Neural-Networks) and [TransMorph](https://github.com/junyuchen245/TransMorph_Transformer_for_Medical_Image_Registration). 
