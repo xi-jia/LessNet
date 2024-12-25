@@ -11,6 +11,7 @@ from Models import *
 import torch.utils.data as Data
 from data import datasets, trans
 from natsort import natsorted
+from torch.utils.data import DataLoader
 import csv
 parser = ArgumentParser()
 parser.add_argument("--lr", type=float,
