@@ -8,6 +8,7 @@ import torch
 from torchvision import transforms
 from Models import *
 # from Functions import TrainDataset
+from torch.utils.data import DataLoader
 import torch.utils.data as Data
 from data import datasets, trans
 from natsort import natsorted
