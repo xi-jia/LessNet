@@ -168,8 +168,8 @@ def train():
                         writer = csv.writer(f)
                         writer.writerow([epoch, np.mean(Dices_Validation)])
                     save_checkpoint(model.state_dict(), model_dir, modelname)
-                modelname = 'Epoch_{:09d}.pth'.format(epoch)
-                torch.save(model.state_dict(), model_dir + modelname)
+                # modelname = 'Epoch_{:09d}.pth'.format(epoch)
+                # torch.save(model.state_dict(), model_dir + modelname)
                 np.save(model_dir + 'Loss.npy', lossall)
             step += 1
 
