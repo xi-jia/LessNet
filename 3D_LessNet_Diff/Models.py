@@ -185,7 +185,6 @@ class SpatialTransform(nn.Module):
         warped = torch.nn.functional.grid_sample(mov_image, sample_grid, mode = mod, align_corners = True)
         
         return warped
-
     
 class DiffeomorphicTransform(nn.Module):
     def __init__(self, time_step=7):
@@ -204,8 +203,6 @@ class DiffeomorphicTransform(nn.Module):
         grid_w = nn.Parameter(grid_w, requires_grad=False)
         grid_h = nn.Parameter(grid_h, requires_grad=False)
         flow = flow / (2 ** self.time_step)
-
-        
         
         for i in range(self.time_step):
             flow_d = flow[:,0,:,:,:]
@@ -215,38 +212,9 @@ class DiffeomorphicTransform(nn.Module):
             disp_h = (grid_h + flow_h).squeeze(1)
             disp_w = (grid_w + flow_w).squeeze(1)
             
-            deformation = torch.stack((disp_w, disp_h, disp_d), 4)  # shape (N, D, H, W, 3)
-	
-									  
+            deformation = torch.stack((disp_w, disp_h, disp_d), 4)  # shape (N, D, H, W, 3)								  
             flow = flow + torch.nn.functional.grid_sample(flow, deformation, mode='bilinear', padding_mode="border", align_corners = True)
-					 
-															 
-															 
-															 
-			
-									  
-													
-													
-
-																				 
-																					   
-		
         return flow
-
-
-									  
-					   
-													
-
-															   
-										
-																	 
-																										   
-																										   
-																										   
-																								 
-						  
-
 
 def smoothloss(y_pred):
     #print('smoothloss y_pred.shape    ',y_pred.shape)
@@ -256,38 +224,6 @@ def smoothloss(y_pred):
     dx = torch.abs(y_pred[:,:,:, 1:, :] - y_pred[:,:, :, :-1, :]) / 2 * h2
     dz = torch.abs(y_pred[:,:,:, :, 1:] - y_pred[:,:, :, :, :-1]) / 2 * w2
     return (torch.mean(dx * dx)+torch.mean(dy*dy)+torch.mean(dz*dz))/3.0
-
-
-def JacboianDet(y_pred, sample_grid):
-    J = y_pred + sample_grid
-    dy = J[:, 1:, :-1, :-1, :] - J[:, :-1, :-1, :-1, :]
-    dx = J[:, :-1, 1:, :-1, :] - J[:, :-1, :-1, :-1, :]
-    dz = J[:, :-1, :-1, 1:, :] - J[:, :-1, :-1, :-1, :]
-
-    Jdet0 = dx[:,:,:,:,0] * (dy[:,:,:,:,1] * dz[:,:,:,:,2] - dy[:,:,:,:,2] * dz[:,:,:,:,1])
-    Jdet1 = dx[:,:,:,:,1] * (dy[:,:,:,:,0] * dz[:,:,:,:,2] - dy[:,:,:,:,2] * dz[:,:,:,:,0])
-    Jdet2 = dx[:,:,:,:,2] * (dy[:,:,:,:,0] * dz[:,:,:,:,1] - dy[:,:,:,:,1] * dz[:,:,:,:,0])
-
-    Jdet = Jdet0 - Jdet1 + Jdet2
-
-    return Jdet
-
-
-def neg_Jdet_loss(y_pred, sample_grid):
-    neg_Jdet = -1.0 * JacboianDet(y_pred, sample_grid)
-    selected_neg_Jdet = F.relu(neg_Jdet)
-
-    return torch.mean(selected_neg_Jdet)
-
-
-def magnitude_loss(flow_1, flow_2):
-    num_ele = torch.numel(flow_1)
-    flow_1_mag = torch.sum(torch.abs(flow_1))
-    flow_2_mag = torch.sum(torch.abs(flow_2))
-
-    diff = (torch.abs(flow_1_mag - flow_2_mag))/num_ele
-
-    return diff
 
 """
 Normalized local cross-correlation function in Pytorch. Modified from https://github.com/voxelmorph/voxelmorph.
@@ -337,21 +273,6 @@ class NCC(torch.nn.Module):
 
         # return negative cc.
         return -1.0 * torch.mean(cc)
-
-class Dice:
-    """
-    N-D dice for segmentation
-    """
-
-    def loss(self, y_true, y_pred):
-        ndims = len(list(y_pred.size())) - 2
-        vol_axes = list(range(2, ndims + 2))
-        top = 2 * (y_true * y_pred).sum(dim=vol_axes)
-        bottom = torch.clamp((y_true + y_pred).sum(dim=vol_axes), min=1e-5)
-        dice = torch.mean(top / bottom)
-        return -dice
-
-
 
 class MSE:
     """
